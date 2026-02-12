@@ -248,7 +248,8 @@ kidsProducts.forEach(item => {
     const card = document.createElement("div");
     card.className = "product-card";
     card.innerHTML = `
-        <a href="/
+        <a href="
+
 product.html?id=${item.id}">
             <img src="${item.images[0]}" alt="${item.title}">
         </a>
