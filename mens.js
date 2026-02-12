@@ -244,7 +244,8 @@ const container = document.getElementById("menProducts");
 mensProducts.forEach(p => {
     container.innerHTML += `
         <div class="card">
-            <a href="product.html?id=${p.id}">
+            <a href="/
+product.html?id=${p.id}">
                 <img src="${p.images[0]}" alt="${p.title}">
             </a>
             <h3>${p.title}</h3>
