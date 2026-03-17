@@ -1,5 +1,7 @@
 {
     "files.exclude": {
         "**/Thumbs.db": false
-    }
+    },
+    "livePreview.openPreviewTarget": "internalPreview",
+    "liveServer.settings.donotShowInfoMsg": true
 }
