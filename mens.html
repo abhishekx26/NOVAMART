@@ -2,12 +2,63 @@
 <html>
 <head>
     <title>Men's Collection - NovaMart</title>
-    <link rel="stylesheet" href="
-
-mens.css">
+    <link rel="stylesheet" href="mens.css">
+    <link rel="stylesheet" href="css/animated-buttons.css">
+    <style>
+        .header {
+            background-color: #232f3e;
+            padding: 10px 0;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: 500;
+        }
+        .navbar a:hover {
+            color: #ff9900;
+        }
+        #logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .navbar_buttons {
+            margin-left: 10px;
+        }
+    </style>
 </head>
 
 <body>
+    <header class="header">
+        <div class="navbar">
+            <div class="navbar_panel">
+                <a href="index.html" id="logo">NovaMart</a>
+                <form action="#">
+                    <input type="search" placeholder="Search for clothing, brands and more" id="search" class="search">
+                </form>
+                <span class="navbar_panel_logos">
+                    <img src="profilelogo.png" alt="user profile logo" width="50px">
+                    <a href="profile.html" class="navbar_buttons" id="my_profile">My Profile</a>
+                </span>
+                <span class="navbar_panel_logos">
+                    <img src="Mycartlogo.png" alt="cart logo" width="25px" id="cart_logo">
+                    <a href="cart.html" class="navbar_buttons" id="mycart">Cart</a>
+                </span>
+                <span class="navbar_panel_logos">
+                    <img src="orderlogo.png" alt="order logo" width="25px" id="order_logo">
+                    <a href="orders.html" class="navbar_buttons" id="order">Orders</a>
+                </span>
+            </div>
+        </div>
+    </header>
 
 <h1 class="heading">Men's Fashion Collection</h1>
 

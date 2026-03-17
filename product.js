@@ -7,7 +7,7 @@ const products = [
         mrp: 1999,
         discount: "75% OFF",
         rating: "4.2",
-        ratingCount: "12,352",
+        ratingCount: "12352",
         images: [
             "product_images/item1.png",
             "product_images/item1.1.png",
@@ -148,7 +148,7 @@ const products = [
         mrp: 1999,
         discount: "60% OFF",
         rating: "4.5",
-        ratingCount: "8,120",
+        ratingCount: "8120",
         images: [
             "product_images/item8.png",
             "product_images/item8.1.png",
@@ -166,7 +166,7 @@ const products = [
         mrp: 1999,
         discount: "60% OFF",
         rating: "4.5",
-        ratingCount: "8,120",
+        ratingCount: "8120",
         images: [
             "product_images/item9.png",
             "product_images/item9.1.png"
@@ -199,11 +199,11 @@ const products = [
         id: 11,
         title: "Men Slim Fit Checkered Spread Collar Casual Shirtt",
         brand: "RODIEZ",
-        price: 1299,
-        mrp: 283,
+        price: 283,
+        mrp: 1299,
         discount: "60% OFF",
         rating: "3.9",
-        ratingCount: "8,120",
+        ratingCount: "8120",
         images: [
             "product_images/item11.png",
             "product_images/item11.1.png",
@@ -225,7 +225,7 @@ const products = [
         mrp: 1500,
         discount: "78% OFF",
         rating: "4.5",
-        ratingCount: "42,500",
+        ratingCount: "42500",
         images: [
             "product_images/item12.png",
             "product_images/item12.1.png",
@@ -681,7 +681,7 @@ const products = [
         brand: "URBAN OX",
         price: 799,
         mrp: 2499,
-        discount: "720% OFF",
+        discount: "72% OFF",
         rating: "4.6",
         ratingCount: "8,120",
         images: [
@@ -784,14 +784,19 @@ product.colors.forEach((clr, index) => {
     colorBox.appendChild(img);
 });
 
-document.getElementById("btnCart").addEventListener("click", () => {
-    alert(product.title + " added to cart!");
-});
-
 document.getElementById("btnBuy").addEventListener("click", () => {
-    
+
+    // Check authentication before allowing purchase
+    if (!getCurrentUser()) {
+        // Store current page as redirect destination
+        localStorage.setItem("redirectAfterLogin", window.location.href);
+        alert("Please login to place an order!");
+        window.location.href = "login.html";
+        return;
+    }
+
     const order = {
-        name: product.title,
+        title: product.title,
         price: product.price,
         image: product.images[0],
         status: "Order Placed",
@@ -814,6 +819,15 @@ let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
 // Add CURRENT product to cart
 document.getElementById("btnCart").addEventListener("click", () => {
+
+    // Check authentication before allowing add to cart
+    if (!getCurrentUser()) {
+        // Store current page as redirect destination
+        localStorage.setItem("redirectAfterLogin", window.location.href);
+        alert("Please login to add items to cart!");
+        window.location.href = "login.html";
+        return;
+    }
 
     const cartItem = {
         id: productId,                 // from URL

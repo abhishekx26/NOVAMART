@@ -5,23 +5,26 @@ const cartItems = document.getElementById("cartItems");
 const totalItems = document.getElementById("totalItems");
 const totalAmount = document.getElementById("totalAmount");
 
+function generateCartItemHTML(item, index) {
+    return `
+        <div class="cart-item">
+            <img src="${item.image}" class="item-image">
+            <div class="item-info">
+                <h3>${item.title}</h3>
+                <p>₹${item.price}</p>
+            </div>
+            <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+        </div>
+    `;
+}
+
 function loadCart() {
     cartItems.innerHTML = "";
     let amount = 0;
 
     cart.forEach((item, index) => {
         amount += Number(item.price);
-
-        cartItems.innerHTML += `
-            <div class="cart-item">
-                <img src="${item.image}" class="item-image">
-                <div class="item-info">
-                    <h3>${item.title}</h3>
-                    <p>₹${item.price}</p>
-                </div>
-                <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
-            </div>
-        `;
+        cartItems.innerHTML += generateCartItemHTML(item, index);
     });
 
     totalItems.textContent = cart.length;

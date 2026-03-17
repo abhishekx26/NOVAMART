@@ -1,0 +1,387 @@
+/* ================================================
+   NOVAMART ANIMATED BUTTONS - Vercel Ready
+   ================================================ */
+
+.button {
+  height: 50px;
+  width: 150px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.5s ease-in-out;
+  margin: 10px 5px;
+  font-family: inherit;
+}
+
+.button:hover {
+  box-shadow: .5px .5px 150px #252525;
+}
+
+/* ============== BUTTON TYPES ============== */
+
+/* Add to Cart Button */
+.btn-cart::after {
+  content: "Added!";
+  height: 50px;
+  width: 150px;
+  background-color: #28a745;
+  color: #fff;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(50px);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-cart::before {
+  content: "Add to Cart";
+  height: 50px;
+  width: 150px;
+  background-color: #fff;
+  color: #28a745;
+  border: 2px solid #28a745;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(0px) scale(1.2);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-cart:hover::after {
+  transform: translateY(0) scale(1.2);
+}
+
+.btn-cart:hover::before {
+  transform: translateY(-50px) scale(0) rotate(120deg);
+}
+
+/* Buy Now Button */
+.btn-buy::after {
+  content: "Ordered!";
+  height: 50px;
+  width: 150px;
+  background-color: #ff5722;
+  color: #fff;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(50px);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-buy::before {
+  content: "Buy Now";
+  height: 50px;
+  width: 150px;
+  background-color: #ff5722;
+  color: #fff;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(0px) scale(1.2);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-buy:hover::after {
+  transform: translateY(0) scale(1.2);
+}
+
+.btn-buy:hover::before {
+  transform: translateY(-50px) scale(0) rotate(120deg);
+}
+
+/* Login Button */
+.btn-login::after {
+  content: "Welcome!";
+  height: 50px;
+  width: 150px;
+  background-color: #007bff;
+  color: #fff;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(50px);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-login::before {
+  content: "Continue";
+  height: 50px;
+  width: 150px;
+  background-color: #007bff;
+  color: #fff;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(0px) scale(1.2);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-login:hover::after {
+  transform: translateY(0) scale(1.2);
+}
+
+.btn-login:hover::before {
+  transform: translateY(-50px) scale(0) rotate(120deg);
+}
+
+/* Logout Button */
+.btn-logout::after {
+  content: "Goodbye!";
+  height: 50px;
+  width: 150px;
+  background-color: #dc3545;
+  color: #fff;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(50px);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-logout::before {
+  content: "Logout";
+  height: 50px;
+  width: 150px;
+  background-color: #fff;
+  color: #dc3545;
+  border: 2px solid #dc3545;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(0px) scale(1.2);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-logout:hover::after {
+  transform: translateY(0) scale(1.2);
+}
+
+.btn-logout:hover::before {
+  transform: translateY(-50px) scale(0) rotate(120deg);
+}
+
+/* Place Order Button */
+.btn-order::after {
+  content: "Success!";
+  height: 50px;
+  width: 150px;
+  background-color: #17a2b8;
+  color: #fff;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(50px);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-order::before {
+  content: "Place Order";
+  height: 50px;
+  width: 150px;
+  background-color: #17a2b8;
+  color: #fff;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(0px) scale(1.2);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-order:hover::after {
+  transform: translateY(0) scale(1.2);
+}
+
+.btn-order:hover::before {
+  transform: translateY(-50px) scale(0) rotate(120deg);
+}
+
+/* Cancel Button */
+.btn-cancel::after {
+  content: "Cancelled";
+  height: 50px;
+  width: 150px;
+  background-color: #6c757d;
+  color: #fff;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(50px);
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-cancel::before {
+  content: "Cancel Order";
+  height: 50px;
+  width: 150px;
+  background-color: #fff;
+  color: #6c757d;
+  border: 2px solid #6c757d;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(0px) scale(1.2);
+  font-size: 1.0rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-cancel:hover::after {
+  transform: translateY(0) scale(1.2);
+}
+
+.btn-cancel:hover::before {
+  transform: translateY(-50px) scale(0) rotate(120deg);
+}
+
+/* Navigation Button */
+.btn-nav::after {
+  content: "Let's Go!";
+  height: 40px;
+  width: 120px;
+  background-color: #ff9900;
+  color: #fff;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(40px);
+  font-size: 1.0rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-nav::before {
+  content: "Explore";
+  height: 40px;
+  width: 120px;
+  background-color: #fff;
+  color: #ff9900;
+  border: 2px solid #ff9900;
+  position: absolute;
+  top: 0%;
+  left: 0%;
+  transform: translateY(0px) scale(1.2);
+  font-size: 1.0rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.5s ease-in-out;
+}
+
+.btn-nav {
+  height: 40px;
+  width: 120px;
+}
+
+.btn-nav:hover::after {
+  transform: translateY(0) scale(1.2);
+}
+
+.btn-nav:hover::before {
+  transform: translateY(-40px) scale(0) rotate(120deg);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .button {
+    height: 45px;
+    width: 130px;
+    font-size: 0.9rem;
+  }
+
+  .btn-nav {
+    height: 35px;
+    width: 100px;
+  }
+
+  .btn-nav::before,
+  .btn-nav::after {
+    height: 35px;
+    width: 100px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .button {
+    height: 40px;
+    width: 120px;
+    font-size: 0.8rem;
+  }
+
+  .btn-nav {
+    height: 30px;
+    width: 90px;
+  }
+
+  .btn-nav::before,
+  .btn-nav::after {
+    height: 30px;
+    width: 90px;
+    font-size: 0.8rem;
+  }
+}

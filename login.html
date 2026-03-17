@@ -2,12 +2,13 @@
 <html>
 <head>
     <title>Login / Signup</title>
+    <link rel="stylesheet" href="css/animated-buttons.css">
     <style>
         body { font-family: Arial; background:#f5f5f5; display:flex; justify-content:center; padding-top:40px; }
         .box { width:350px; background:#fff; padding:25px; border-radius:10px; box-shadow:0 0 10px #ddd; }
         h2 { text-align:center; margin-bottom:20px; }
-        input { width:100%; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:5px; }
-        button { width:100%; background:#ff5722; border:none; padding:12px; color:#fff; font-size:16px; border-radius:5px; cursor:pointer; }
+        input { width:100%; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:5px; box-sizing: border-box; }
+        .button-container { display: flex; justify-content: center; margin-top: 20px; }
     </style>
 </head>
 
@@ -19,9 +20,15 @@
     <input id="email" placeholder="Email">
     <input id="phone" placeholder="Mobile Number">
 
-    <button id="saveUser">Continue</button>
+    <div class="button-container">
+        <button id="saveUser" class="button btn-login"></button>
+    </div>
 </div>
 
+<script>
+    window.noAutoAuth = true; // Disable auto-redirect on login page
+</script>
+<script src="js/shared/auth.js"></script>
 <script src="login.js"></script>
 </body>
 </html>

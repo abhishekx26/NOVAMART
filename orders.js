@@ -19,13 +19,13 @@ orders.forEach((order, index) => {
         <img src="${order.image}" alt="">
         
         <div class="order-details">
-            <h3>${order.name || order.title}</h3>
+            <h3>${order.title}</h3>
 
             <p><b>Price:</b> ₹${order.price}</p>
             <p><b>Ordered on:</b> ${order.date}</p>
         </div>
 
-        <button class="cancel-btn" onclick="cancelOrder(${index})">Cancel Order</button>
+        <button class="button btn-cancel" onclick="cancelOrder(${index})"></button>
     `;
 
     ordersList.appendChild(div);
