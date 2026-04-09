@@ -9,17 +9,21 @@
         input { width:100%; padding:10px; margin:10px 0; border:1px solid #ccc; border-radius:5px; }
         button { width:100%; background:#ff5722; border:none; padding:12px; color:#fff; font-size:16px; border-radius:5px; cursor:pointer; }
     </style>
+    <script src="js/api-client.js"></script>
 </head>
 
 <body>
 <div class="box">
     <h2>Login / Signup</h2>
 
-    <input id="name" placeholder="Full Name">
-    <input id="email" placeholder="Email">
-    <input id="phone" placeholder="Mobile Number">
-
-    <button id="saveUser">Continue</button>
+    <input id="name" placeholder="Full Name" required>
+    <input id="email" placeholder="Email" type="email" required>
+    <input id="phone" placeholder="Mobile Number" type="tel" required>
+    <input id="password" placeholder="Password" type="password" required>
+    <input id="address" placeholder="Address (Optional)" type="text">
+    
+    <button id="saveUser">Login / Register</button>
+    <p style="text-align:center; font-size:12px; margin-top:10px;">New user? Password will be created on first login</p>
 </div>
 
 <script src="login.js"></script>
