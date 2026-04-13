@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { User } = require('../models/index');
 const { sendEmail } = require('../config/email');
 const { authenticateToken } = require('../middleware/auth');
 
@@ -16,19 +16,17 @@ router.post('/register', async (req, res) => {
       .json({ error: 'Please provide all required fields' });
   }
 
-  const existingUser = await User.findOne({ email });
+  const existingUser = await User.findOne({ where: { email } });
   if (existingUser) {
     return res.status(400).json({ error: 'Email already registered' });
   }
 
-  const user = new User({
+  const user = await User.create({
     fullName,
     email,
     phone,
     password,
   });
-
-  await user.save();
 
   // Send welcome email
   try {
@@ -42,7 +40,7 @@ router.post('/register', async (req, res) => {
   }
 
   const token = jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user.id, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRE || '7d' }
   );
@@ -51,7 +49,7 @@ router.post('/register', async (req, res) => {
     message: 'User registered successfully',
     token,
     user: {
-      id: user._id,
+      id: user.id,
       fullName: user.fullName,
       email: user.email,
       phone: user.phone,
@@ -70,7 +68,7 @@ router.post('/login', async (req, res) => {
       .json({ error: 'Please provide email and password' });
   }
 
-  const user = await User.findOne({ email }).select('+password');
+  const user = await User.findOne({ where: { email } });
   if (!user) {
     return res.status(401).json({ error: 'Invalid email or password' });
   }
@@ -81,7 +79,7 @@ router.post('/login', async (req, res) => {
   }
 
   const token = jwt.sign(
-    { id: user._id, role: user.role },
+    { id: user.id, role: user.role },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRE || '7d' }
   );
@@ -90,7 +88,7 @@ router.post('/login', async (req, res) => {
     message: 'Login successful',
     token,
     user: {
-      id: user._id,
+      id: user.id,
       fullName: user.fullName,
       email: user.email,
       phone: user.phone,
@@ -101,15 +99,25 @@ router.post('/login', async (req, res) => {
 
 // Get current user profile
 router.get('/me', authenticateToken, async (req, res) => {
-  const user = await User.findById(req.user.id).populate('orders');
+  const user = await User.findByPk(req.user.id);
+
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
 
   res.json({
     user: {
-      id: user._id,
+      id: user.id,
       fullName: user.fullName,
       email: user.email,
       phone: user.phone,
-      address: user.address,
+      address: {
+        street: user.street,
+        city: user.city,
+        state: user.state,
+        pincode: user.pincode,
+        country: user.country,
+      },
       role: user.role,
     },
   });
@@ -117,65 +125,76 @@ router.get('/me', authenticateToken, async (req, res) => {
 
 // Update profile
 router.put('/me', authenticateToken, async (req, res) => {
-  const { fullName, phone, address } = req.body;
+  const { fullName, phone, street, city, state, pincode, country } = req.body;
 
-  const user = await User.findByIdAndUpdate(
-    req.user.id,
-    { fullName, phone, address },
-    { new: true, runValidators: true }
-  );
+  try {
+    await User.update(
+      { fullName, phone, street, city, state, pincode, country },
+      { where: { id: req.user.id }, returning: true }
+    );
 
-  res.json({
-    message: 'Profile updated successfully',
-    user: {
-      id: user._id,
-      fullName: user.fullName,
-      email: user.email,
-      phone: user.phone,
-      address: user.address,
-    },
-  });
+    const user = await User.findByPk(req.user.id);
+
+    res.json({
+      message: 'Profile updated successfully',
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
+        address: {
+          street: user.street,
+          city: user.city,
+          state: user.state,
+          pincode: user.pincode,
+          country: user.country,
+        },
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update profile' });
+  }
 });
 
 // Forgot password
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ where: { email } });
   if (!user) {
     return res.status(404).json({ error: 'User not found' });
   }
 
   const resetToken = jwt.sign(
-    { id: user._id },
+    { id: user.id },
     process.env.JWT_SECRET,
     { expiresIn: '1h' }
   );
 
-  user.resetPasswordToken = resetToken;
-  user.resetPasswordExpiresAt = new Date(Date.now() + 60 * 60 * 1000);
-  await user.save();
-
-  const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-
   try {
+    await User.update(
+      {
+        resetPasswordToken: resetToken,
+        resetPasswordExpiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      },
+      { where: { id: user.id } }
+    );
+
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
     await sendEmail(
       email,
       'Password Reset Request',
       `<p>Click <a href="${resetUrl}">here</a> to reset your password. This link expires in 1 hour.</p>`
     );
-  } catch (emailError) {
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpiresAt = undefined;
-    await user.save();
-    return res
-      .status(500)
-      .json({ error: 'Failed to send reset email' });
-  }
 
-  res.json({
-    message: 'Password reset email sent',
-  });
+    res.json({
+      message: 'Password reset email sent',
+    });
+  } catch (emailError) {
+    console.error('Email error:', emailError);
+    res.status(500).json({ error: 'Failed to send reset email' });
+  }
 });
 
 // Reset password
@@ -195,7 +214,7 @@ router.post('/reset-password', async (req, res) => {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 
-  const user = await User.findById(decoded.id);
+  const user = await User.findByPk(decoded.id);
   if (!user || user.resetPasswordToken !== token) {
     return res.status(401).json({ error: 'Invalid reset token' });
   }
@@ -204,12 +223,20 @@ router.post('/reset-password', async (req, res) => {
     return res.status(401).json({ error: 'Token expired' });
   }
 
-  user.password = password;
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpiresAt = undefined;
-  await user.save();
+  try {
+    await User.update(
+      {
+        password,
+        resetPasswordToken: null,
+        resetPasswordExpiresAt: null,
+      },
+      { where: { id: user.id } }
+    );
 
-  res.json({ message: 'Password reset successfully' });
+    res.json({ message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to reset password' });
+  }
 });
 
 // Logout

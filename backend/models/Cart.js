@@ -1,43 +1,54 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const cartSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-      unique: true,
-    },
-    items: [
-      {
-        productId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product',
-          required: true,
-        },
-        quantity: {
-          type: Number,
-          required: true,
-          default: 1,
-        },
-        size: String,
-        color: String,
-        addedAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
-    totalPrice: {
-      type: Number,
-      default: 0,
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now,
+const Cart = sequelize.define('Cart', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    unique: true,
+  },
+  totalPrice: {
+    type: DataTypes.DECIMAL(10, 2),
+    defaultValue: 0,
+  },
+}, {
+  timestamps: true,
+});
+
+const CartItem = sequelize.define('CartItem', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  cartId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  productId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  quantity: {
+    type: DataTypes.INTEGER,
+    defaultValue: 1,
+    validate: {
+      min: 1,
     },
   },
-  { timestamps: true }
-);
+  size: DataTypes.STRING,
+  color: DataTypes.STRING,
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Cart', cartSchema);
+// Association
+Cart.hasMany(CartItem, { foreignKey: 'cartId', as: 'items', onDelete: 'CASCADE' });
+CartItem.belongsTo(Cart, { foreignKey: 'cartId' });
+
+module.exports = { Cart, CartItem };

@@ -1,181 +1,213 @@
 const express = require('express');
-const Product = require('../models/Product');
+const { Op } = require('sequelize');
+const { Product } = require('../models/index');
 const { authenticateToken, isAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
 // Get all products with filtering, sorting, and pagination
 router.get('/', async (req, res) => {
-  const { category, minPrice, maxPrice, sort, page = 1, limit = 20 } = req.query;
+  try {
+    const { category, minPrice, maxPrice, sort, page = 1, limit = 20 } = req.query;
 
-  let filter = { isActive: true };
+    let where = { isActive: true };
 
-  if (category) {
-    filter.category = category;
+    if (category) {
+      where.category = category.toLowerCase();
+    }
+
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price[Op.gte] = parseFloat(minPrice);
+      if (maxPrice) where.price[Op.lte] = parseFloat(maxPrice);
+    }
+
+    const offset = (parseInt(page) - 1) * parseInt(limit);
+    let orderClause = [['rating', 'DESC']]; // Default: by rating
+
+    if (sort === 'price_asc') orderClause = [['price', 'ASC']];
+    else if (sort === 'price_desc') orderClause = [['price', 'DESC']];
+    else if (sort === 'newest') orderClause = [['createdAt', 'DESC']];
+
+    const { count, rows } = await Product.findAndCountAll({
+      where,
+      order: orderClause,
+      offset,
+      limit: parseInt(limit),
+    });
+
+    res.json({
+      total: count,
+      page: parseInt(page),
+      pages: Math.ceil(count / parseInt(limit)),
+      products: rows,
+    });
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
   }
-
-  if (minPrice || maxPrice) {
-    filter.price = {};
-    if (minPrice) filter.price.$gte = parseFloat(minPrice);
-    if (maxPrice) filter.price.$lte = parseFloat(maxPrice);
-  }
-
-  const skip = (page - 1) * limit;
-  let sortObj = {};
-
-  if (sort === 'price_asc') sortObj.price = 1;
-  else if (sort === 'price_desc') sortObj.price = -1;
-  else if (sort === 'newest') sortObj.createdAt = -1;
-  else sortObj.rating = -1; // Default: by rating
-
-  const total = await Product.countDocuments(filter);
-  const products = await Product.find(filter)
-    .sort(sortObj)
-    .skip(skip)
-    .limit(parseInt(limit));
-
-  res.json({
-    total,
-    page: parseInt(page),
-    pages: Math.ceil(total / limit),
-    products,
-  });
 });
 
 // Get products by category
 router.get('/category/:category', async (req, res) => {
-  const { category } = req.params;
-  const { page = 1, limit = 20 } = req.query;
+  try {
+    const { category } = req.params;
+    const { page = 1, limit = 20 } = req.query;
 
-  const skip = (page - 1) * limit;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
-  const total = await Product.countDocuments({
-    category: category.toLowerCase(),
-    isActive: true,
-  });
-  const products = await Product.find({
-    category: category.toLowerCase(),
-    isActive: true,
-  })
-    .skip(skip)
-    .limit(parseInt(limit));
+    const { count, rows } = await Product.findAndCountAll({
+      where: {
+        category: category.toLowerCase(),
+        isActive: true,
+      },
+      offset,
+      limit: parseInt(limit),
+    });
 
-  res.json({
-    total,
-    page: parseInt(page),
-    pages: Math.ceil(total / limit),
-    products,
-  });
+    res.json({
+      total: count,
+      page: parseInt(page),
+      pages: Math.ceil(count / parseInt(limit)),
+      products: rows,
+    });
+  } catch (error) {
+    console.error('Error fetching products by category:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
 });
 
 // Search products
 router.get('/search/:query', async (req, res) => {
-  const { query } = req.params;
-  const { page = 1, limit = 20 } = req.query;
+  try {
+    const { query } = req.params;
+    const { page = 1, limit = 20 } = req.query;
 
-  const skip = (page - 1) * limit;
+    const offset = (parseInt(page) - 1) * parseInt(limit);
 
-  const total = await Product.countDocuments({
-    $text: { $search: query },
-    isActive: true,
-  });
-  const products = await Product.find({
-    $text: { $search: query },
-    isActive: true,
-  })
-    .skip(skip)
-    .limit(parseInt(limit));
+    const { count, rows } = await Product.findAndCountAll({
+      where: {
+        title: {
+          [Op.like]: `%${query}%`,
+        },
+        isActive: true,
+      },
+      offset,
+      limit: parseInt(limit),
+    });
 
-  res.json({
-    total,
-    page: parseInt(page),
-    pages: Math.ceil(total / limit),
-    products,
-  });
+    res.json({
+      total: count,
+      page: parseInt(page),
+      pages: Math.ceil(count / parseInt(limit)),
+      products: rows,
+    });
+  } catch (error) {
+    console.error('Error searching products:', error);
+    res.status(500).json({ error: 'Failed to search products' });
+  }
 });
 
 // Get single product
 router.get('/:id', async (req, res) => {
-  const product = await Product.findById(req.params.id);
+  try {
+    const product = await Product.findByPk(req.params.id);
 
-  if (!product) {
-    return res.status(404).json({ error: 'Product not found' });
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    res.json(product);
+  } catch (error) {
+    console.error('Error fetching product:', error);
+    res.status(500).json({ error: 'Failed to fetch product' });
   }
-
-  res.json(product);
 });
 
 // Add product (admin only)
 router.post('/', authenticateToken, isAdmin, async (req, res) => {
-  const {
-    id,
-    title,
-    brand,
-    price,
-    mrp,
-    discount,
-    rating,
-    ratingCount,
-    category,
-    images,
-    colors,
-    description,
-  } = req.body;
+  try {
+    const {
+      productId,
+      title,
+      brand,
+      price,
+      mrp,
+      discount,
+      rating,
+      ratingCount,
+      category,
+      images,
+      colors,
+      sizes,
+      description,
+      inventory,
+    } = req.body;
 
-  const product = new Product({
-    id,
-    title,
-    brand,
-    price,
-    mrp,
-    discount,
-    rating,
-    ratingCount,
-    category,
-    images,
-    colors,
-    description,
-  });
+    const product = await Product.create({
+      productId,
+      title,
+      brand,
+      price,
+      mrp,
+      discount,
+      rating,
+      ratingCount,
+      category,
+      images: typeof images === 'string' ? images : JSON.stringify(images),
+      colors: typeof colors === 'string' ? colors : JSON.stringify(colors),
+      sizes: typeof sizes === 'string' ? sizes : JSON.stringify(sizes),
+      description,
+      inventory,
+    });
 
-  await product.save();
-
-  res.status(201).json({
-    message: 'Product created successfully',
-    product,
-  });
+    res.status(201).json({
+      message: 'Product created successfully',
+      product,
+    });
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ error: 'Failed to create product' });
+  }
 });
 
 // Update product (admin only)
 router.put('/:id', authenticateToken, isAdmin, async (req, res) => {
-  const product = await Product.findByIdAndUpdate(
-    req.params.id,
-    req.body,
-    { new: true, runValidators: true }
-  );
+  try {
+    const product = await Product.findByPk(req.params.id);
 
-  if (!product) {
-    return res.status(404).json({ error: 'Product not found' });
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    await product.update(req.body);
+
+    res.json({
+      message: 'Product updated successfully',
+      product,
+    });
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ error: 'Failed to update product' });
   }
-
-  res.json({
-    message: 'Product updated successfully',
-    product,
-  });
 });
 
 // Delete product (admin only)
 router.delete('/:id', authenticateToken, isAdmin, async (req, res) => {
-  const product = await Product.findByIdAndUpdate(
-    req.params.id,
-    { isActive: false },
-    { new: true }
-  );
+  try {
+    const product = await Product.findByPk(req.params.id);
 
-  if (!product) {
-    return res.status(404).json({ error: 'Product not found' });
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    await product.update({ isActive: false });
+
+    res.json({ message: 'Product deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ error: 'Failed to delete product' });
   }
-
-  res.json({ message: 'Product deleted successfully' });
 });
 
 module.exports = router;

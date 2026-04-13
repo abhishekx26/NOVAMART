@@ -1,83 +1,99 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const productSchema = new mongoose.Schema(
-  {
-    id: {
-      type: Number,
-      unique: true,
-      required: true,
-    },
-    title: {
-      type: String,
-      required: [true, 'Please provide product title'],
-      trim: true,
-    },
-    brand: {
-      type: String,
-      required: [true, 'Please provide brand name'],
-      trim: true,
-    },
-    description: {
-      type: String,
-      default: '',
-    },
-    price: {
-      type: Number,
-      required: [true, 'Please provide product price'],
-    },
-    mrp: {
-      type: Number,
-      required: [true, 'Please provide MRP'],
-    },
-    discount: {
-      type: String, // e.g., "20% OFF"
-      default: '0% OFF',
-    },
-    rating: {
-      type: String, // e.g., "4.5"
-      default: '0',
-    },
-    ratingCount: {
-      type: String,
-      default: '0',
-    },
-    category: {
-      type: String,
-      enum: ['mens', 'womens', 'kids'],
-      required: [true, 'Please provide category'],
-    },
-    images: [
-      {
-        type: String, // Array of image URLs/paths
-      },
-    ],
-    colors: [
-      {
-        type: String, // Array of color variant images
-      },
-    ],
-    sizes: {
-      type: [String],
-      default: ['M', 'L', 'XL', 'XXL'],
-    },
-    inventory: {
-      type: Number,
-      default: 50,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now,
+const Product = sequelize.define('Product', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  productId: {
+    type: DataTypes.INTEGER,
+    unique: true,
+    allowNull: false,
+  },
+  title: {
+    type: DataTypes.STRING(255),
+    allowNull: false,
+    validate: {
+      notEmpty: true,
     },
   },
-  { timestamps: true }
-);
+  brand: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    validate: {
+      notEmpty: true,
+    },
+  },
+  description: {
+    type: DataTypes.TEXT,
+    defaultValue: '',
+  },
+  price: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    validate: {
+      isDecimal: true,
+    },
+  },
+  mrp: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+    validate: {
+      isDecimal: true,
+    },
+  },
+  discount: {
+    type: DataTypes.STRING(100),
+    defaultValue: '0% OFF',
+  },
+  rating: {
+    type: DataTypes.DECIMAL(3, 1),
+    defaultValue: 0,
+  },
+  ratingCount: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0,
+  },
+  category: {
+    type: DataTypes.ENUM('mens', 'womens', 'kids'),
+    allowNull: false,
+    validate: {
+      isIn: [['mens', 'womens', 'kids']],
+    },
+  },
+  images: {
+    type: DataTypes.JSON,
+    defaultValue: [],
+  },
+  colors: {
+    type: DataTypes.JSON,
+    defaultValue: [],
+  },
+  sizes: {
+    type: DataTypes.JSON,
+    defaultValue: ['M', 'L', 'XL', 'XXL'],
+  },
+  inventory: {
+    type: DataTypes.INTEGER,
+    defaultValue: 50,
+  },
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+  },
+}, {
+  timestamps: true,
+  indexes: [
+    {
+      fields: ['category', 'price', 'rating'],
+    },
+    {
+      fields: ['title'],
+      type: 'FULLTEXT',
+    },
+  ],
+});
 
-// Index for search and filtering
-productSchema.index({ title: 'text', description: 'text', brand: 'text' });
-productSchema.index({ category: 1, price: 1, rating: 1 });
-
-module.exports = mongoose.model('Product', productSchema);
+module.exports = Product;

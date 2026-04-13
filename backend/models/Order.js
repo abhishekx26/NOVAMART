@@ -1,64 +1,72 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/db');
 
-const orderSchema = new mongoose.Schema(
-  {
-    userId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-      required: true,
-    },
-    items: [
-      {
-        productId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product',
-          required: true,
-        },
-        title: String,
-        price: Number,
-        quantity: Number,
-        size: String,
-        color: String,
-        image: String,
-      },
-    ],
-    shippingAddress: {
-      fullName: String,
-      street: String,
-      city: String,
-      state: String,
-      pincode: String,
-      country: String,
-      phone: String,
-    },
-    totalPrice: {
-      type: Number,
-      required: true,
-    },
-    paymentMethod: {
-      type: String,
-      enum: ['stripe', 'cod'], // COD = Cash on Delivery
-      default: 'stripe',
-    },
-    paymentStatus: {
-      type: String,
-      enum: ['pending', 'completed', 'failed'],
-      default: 'pending',
-    },
-    orderStatus: {
-      type: String,
-      enum: ['placed', 'confirmed', 'shipped', 'delivered', 'cancelled'],
-      default: 'placed',
-    },
-    stripePaymentIntentId: String,
-    cancellationReason: String,
-    cancelledAt: Date,
-    createdAt: {
-      type: Date,
-      default: Date.now,
-    },
+const Order = sequelize.define('Order', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
   },
-  { timestamps: true }
-);
+  userId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  totalPrice: {
+    type: DataTypes.DECIMAL(10, 2),
+    allowNull: false,
+  },
+  paymentMethod: {
+    type: DataTypes.ENUM('stripe', 'cod'),
+    defaultValue: 'stripe',
+  },
+  paymentStatus: {
+    type: DataTypes.ENUM('pending', 'completed', 'failed'),
+    defaultValue: 'pending',
+  },
+  orderStatus: {
+    type: DataTypes.ENUM('placed', 'confirmed', 'shipped', 'delivered', 'cancelled'),
+    defaultValue: 'placed',
+  },
+  shippingFullName: DataTypes.STRING,
+  shippingStreet: DataTypes.STRING,
+  shippingCity: DataTypes.STRING,
+  shippingState: DataTypes.STRING,
+  shippingPincode: DataTypes.STRING,
+  shippingCountry: DataTypes.STRING,
+  shippingPhone: DataTypes.STRING,
+  stripePaymentIntentId: DataTypes.STRING,
+  cancellationReason: DataTypes.TEXT,
+  cancelledAt: DataTypes.DATE,
+}, {
+  timestamps: true,
+});
 
-module.exports = mongoose.model('Order', orderSchema);
+const OrderItem = sequelize.define('OrderItem', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  orderId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  productId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  title: DataTypes.STRING,
+  price: DataTypes.DECIMAL(10, 2),
+  quantity: DataTypes.INTEGER,
+  size: DataTypes.STRING,
+  color: DataTypes.STRING,
+  image: DataTypes.STRING,
+}, {
+  timestamps: true,
+});
+
+// Association
+Order.hasMany(OrderItem, { foreignKey: 'orderId', as: 'items', onDelete: 'CASCADE' });
+OrderItem.belongsTo(Order, { foreignKey: 'orderId' });
+
+module.exports = { Order, OrderItem };

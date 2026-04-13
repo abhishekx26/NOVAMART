@@ -1,87 +1,72 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
 const bcrypt = require('bcryptjs');
+const { sequelize } = require('../config/db');
 
-const userSchema = new mongoose.Schema(
-  {
-    fullName: {
-      type: String,
-      required: [true, 'Please provide your full name'],
-      trim: true,
-    },
-    email: {
-      type: String,
-      required: [true, 'Please provide your email'],
-      unique: true,
-      lowercase: true,
-      match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Please provide a valid email'],
-    },
-    phone: {
-      type: String,
-      required: [true, 'Please provide your phone number'],
-      match: [/^\d{10}$/, 'Phone number must be 10 digits'],
-    },
-    password: {
-      type: String,
-      required: [true, 'Please provide a password'],
-      minlength: 6,
-      select: false, // Don't return password by default
-    },
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      pincode: String,
-      country: String,
-    },
-    role: {
-      type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
-    },
-    cart: [
-      {
-        productId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product',
-        },
-        quantity: Number,
-        size: String,
-        color: String,
-        addedAt: {
-          type: Date,
-          default: Date.now,
-        },
-      },
-    ],
-    orders: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order',
-      },
-    ],
-    resetPasswordToken: String,
-    resetPasswordExpiresAt: Date,
-    createdAt: {
-      type: Date,
-      default: Date.now,
+const User = sequelize.define('User', {
+  id: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  fullName: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      notEmpty: true,
     },
   },
-  { timestamps: true }
-);
-
-// Hash password before saving
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) {
-    next();
-  }
-
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+    lowercase: true,
+    validate: {
+      isEmail: true,
+    },
+  },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      is: /^\d{10}$/,
+    },
+  },
+  password: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      len: [6, Infinity],
+    },
+  },
+  street: DataTypes.STRING,
+  city: DataTypes.STRING,
+  state: DataTypes.STRING,
+  pincode: DataTypes.STRING,
+  country: DataTypes.STRING,
+  role: {
+    type: DataTypes.ENUM('user', 'admin'),
+    defaultValue: 'user',
+  },
+  resetPasswordToken: DataTypes.STRING,
+  resetPasswordExpiresAt: DataTypes.DATE,
+}, {
+  timestamps: true,
+  hooks: {
+    beforeCreate: async (user) => {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(user.password, salt);
+    },
+    beforeUpdate: async (user) => {
+      if (user.changed('password')) {
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+      }
+    },
+  },
 });
 
-// Method to compare passwords
-userSchema.methods.matchPassword = async function (enteredPassword) {
+User.prototype.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = User;

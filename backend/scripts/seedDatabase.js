@@ -1,25 +1,98 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
-const Product = require('../models/Product');
-const connectDB = require('../config/db');
+const { sequelize } = require('../config/db');
+const { User, Product } = require('../models/index');
 
-// Import product data from existing frontend files
-// Note: These are the hardcoded arrays from the frontend
-const mensProducts = [
-  {
-    id: 1,
-    title: "Men's Black Shirt",
-    brand: "MONTREZ",
-    price: 799,
-    mrp: 1999,
-    discount: "75% OFF",
-    rating: "4.2",
-    ratingCount: "12,352",
-    images: ["product_images/item1.png", "product_images/item1.1.png", "product_images/item1.2.png", "product_images/item1.3.png"],
-    colors: ["product_images/item1.png", "product_images/item1.1.png", "product_images/item1.2.png"],
-    category: "mens",
-    description: "Premium quality men's black shirt made from high-quality fabric",
-  },
+// Product data - all 34 products
+const allProducts = [
+  // Men's Products (1-12)
+  { productId: 1, title: "Men's Black Shirt", brand: "MONTREZ", category: "mens", price: 799, mrp: 1999, discount: "75% OFF", rating: 4.2, ratingCount: 12352, images: JSON.stringify(["product_images/item1.png"]), colors: JSON.stringify(["product_images/item1.png"]) },
+  { productId: 2, title: "Men Solid Round Neck Dark Green T-Shirt", brand: "WIERDO", category: "mens", price: 379, mrp: 1099, discount: "65% OFF", rating: 4.3, ratingCount: 600, images: JSON.stringify(["product_images/item2.png"]), colors: JSON.stringify(["product_images/item2.png"]) },
+  { productId: 3, title: "Men Slim Fit Mandarin Collar Casual Shirt", brand: "FUBAR", category: "mens", price: 255, mrp: 1200, discount: "76% OFF", rating: 4.5, ratingCount: 5499, images: JSON.stringify(["product_images/item3.png"]), colors: JSON.stringify(["product_images/item3.png"]) },
+  { productId: 4, title: "Men Solid Mandarin Collar Black T-Shirt", brand: "TRIPR", category: "mens", price: 247, mrp: 2499, discount: "75% OFF", rating: 3.8, ratingCount: 1200, images: JSON.stringify(["product_images/item4.png"]), colors: JSON.stringify(["product_images/item4.png"]) },
+  { productId: 5, title: "Men Printed Polo Neck Beige T-Shirt", brand: "JUMP CUTS", category: "mens", price: 382, mrp: 2499, discount: "78% OFF", rating: 3.8, ratingCount: 87, images: JSON.stringify(["product_images/item5.png"]), colors: JSON.stringify(["product_images/item5.png"]) },
+  { productId: 6, title: "Men Regular Fit Casual Shirt", brand: "BLEZZA", category: "mens", price: 299, mrp: 1999, discount: "78% OFF", rating: 3.6, ratingCount: 12, images: JSON.stringify(["product_images/item6.png"]), colors: JSON.stringify(["product_images/item6.png"]) },
+  { productId: 7, title: "Men Regular Fit Solid Casual Shirt", brand: "BLEZZA", category: "mens", price: 319, mrp: 1999, discount: "84% OFF", rating: 4.2, ratingCount: 2010, images: JSON.stringify(["product_images/item7.png"]), colors: JSON.stringify(["product_images/item7.png"]) },
+  { productId: 8, title: "Men Full Sleeve Hooded Sweatshirt", brand: "BEING WANTED", category: "mens", price: 600, mrp: 1999, discount: "60% OFF", rating: 4.5, ratingCount: 8120, images: JSON.stringify(["product_images/item8.png"]), colors: JSON.stringify(["product_images/item8.png"]) },
+  { productId: 9, title: "Men Full Sleeve Hooded Sweatshirt Blue", brand: "BEING WANTED", category: "mens", price: 600, mrp: 1999, discount: "60% OFF", rating: 4.5, ratingCount: 8120, images: JSON.stringify(["product_images/item9.png"]), colors: JSON.stringify(["product_images/item9.png"]) },
+  { productId: 10, title: "Men Full Sleeve Printed Hooded Sweatshirt", brand: "JUMP CUTS", category: "mens", price: 432, mrp: 1999, discount: "78% OFF", rating: 4.5, ratingCount: 600, images: JSON.stringify(["product_images/item10.png"]), colors: JSON.stringify(["product_images/item10.png"]) },
+  { productId: 11, title: "Men Slim Fit Checkered Shirt", brand: "RODIEZ", category: "mens", price: 1299, mrp: 2829, discount: "60% OFF", rating: 3.9, ratingCount: 8120, images: JSON.stringify(["product_images/item11.png"]), colors: JSON.stringify(["product_images/item11.png"]) },
+  { productId: 12, title: "Men Regular Fit Spread Collar Shirt", brand: "METRONAUT", category: "mens", price: 299, mrp: 1500, discount: "78% OFF", rating: 4.5, ratingCount: 42500, images: JSON.stringify(["product_images/item12.png"]), colors: JSON.stringify(["product_images/item12.png"]) },
+
+  // Women's Products (13-24)
+  { productId: 13, title: "Women Printed Crepe Straight Kurta", brand: "ETHNIC BASKET", category: "womens", price: 162, mrp: 1500, discount: "83% OFF", rating: 3.7, ratingCount: 21, images: JSON.stringify(["product_images/item13.png"]), colors: JSON.stringify(["product_images/item13.png"]) },
+  { productId: 14, title: "Women Printed Crepe Kurta Multicolor", brand: "ETHNIC BASKET", category: "womens", price: 162, mrp: 1500, discount: "83% OFF", rating: 3.7, ratingCount: 21, images: JSON.stringify(["product_images/item14.png"]), colors: JSON.stringify(["product_images/item14.png"]) },
+  { productId: 15, title: "Women Printed Crepe Kurta Design", brand: "ETHNIC BASKET", category: "womens", price: 162, mrp: 1500, discount: "83% OFF", rating: 3.7, ratingCount: 21, images: JSON.stringify(["product_images/item15.png"]), colors: JSON.stringify(["product_images/item15.png"]) },
+  { productId: 16, title: "Women Printed Crepe Straight Kurta Blue", brand: "ETHNIC BASKET", category: "womens", price: 162, mrp: 1500, discount: "83% OFF", rating: 3.7, ratingCount: 21, images: JSON.stringify(["product_images/item16.png"]), colors: JSON.stringify(["product_images/item16.png"]) },
+  { productId: 17, title: "Women Relaxed Viscose Rayon Trousers", brand: "GURARA FASHION", category: "womens", price: 334, mrp: 699, discount: "52% OFF", rating: 3.8, ratingCount: 119, images: JSON.stringify(["product_images/item17.png"]), colors: JSON.stringify(["product_images/item17.png"]) },
+  { productId: 18, title: "Women Regular Fit Black Viscose Trousers", brand: "GO GAZHAB", category: "womens", price: 327, mrp: 1200, discount: "74% OFF", rating: 4.5, ratingCount: 3458, images: JSON.stringify(["product_images/item18.png"]), colors: JSON.stringify(["product_images/item18.png"]) },
+  { productId: 19, title: "Embellished Bollywood Tissue Pure Silk Saree", brand: "BRAHMSHAKTI", category: "womens", price: 471, mrp: 2548, discount: "69% OFF", rating: 4.1, ratingCount: 9999, images: JSON.stringify(["product_images/item19.png"]), colors: JSON.stringify(["product_images/item19.png"]) },
+  { productId: 20, title: "Embroidered Bollywood Tissue Saree Green", brand: "KOSKI", category: "womens", price: 2392, mrp: 4999, discount: "45% OFF", rating: 4.5, ratingCount: 400, images: JSON.stringify(["product_images/item20.png"]), colors: JSON.stringify(["product_images/item20.png"]) },
+  { productId: 21, title: "Embroidered Bollywood Chiffon Saree Maroon", brand: "LABHESHWARI", category: "womens", price: 471, mrp: 1549, discount: "50% OFF", rating: 3.8, ratingCount: 666, images: JSON.stringify(["product_images/item21.png"]), colors: JSON.stringify(["product_images/item21.png"]) },
+  { productId: 22, title: "Women Self Design High Neck Black Sweater", brand: "BLACK BLINK", category: "womens", price: 330, mrp: 1699, discount: "63% OFF", rating: 3.9, ratingCount: 436, images: JSON.stringify(["product_images/item22.png"]), colors: JSON.stringify(["product_images/item22.png"]) },
+  { productId: 23, title: "Women Solid Casual Jacket", brand: "VERO AMORE", category: "womens", price: 861, mrp: 2458, discount: "63% OFF", rating: 4.1, ratingCount: 845, images: JSON.stringify(["product_images/item23.png"]), colors: JSON.stringify(["product_images/item23.png"]) },
+  { productId: 24, title: "Women Full Sleeve Printed Sweatshirt", brand: "REQUIN", category: "womens", price: 1486, mrp: 2499, discount: "24% OFF", rating: 4.2, ratingCount: 7412, images: JSON.stringify(["product_images/item24.png"]), colors: JSON.stringify(["product_images/item24.png"]) },
+
+  // Kids' Products (25-34)
+  { productId: 25, title: "Boys Casual T-shirt Track Pants Yellow", brand: "ICEPIE", category: "kids", price: 322, mrp: 1500, discount: "55% OFF", rating: 4.2, ratingCount: 3022, images: JSON.stringify(["product_images/item25.png"]), colors: JSON.stringify(["product_images/item25.png"]) },
+  { productId: 26, title: "Baby Boys Girls Casual T-shirt Track Pants", brand: "ELPIXIE FASHION", category: "kids", price: 269, mrp: 2499, discount: "73% OFF", rating: 4.5, ratingCount: 12120, images: JSON.stringify(["product_images/item26.png"]), colors: JSON.stringify(["product_images/item26.png"]) },
+  { productId: 27, title: "Baby Boys Casual T-shirt Shorts", brand: "MARS INFINTY", category: "kids", price: 414, mrp: 2499, discount: "79% OFF", rating: 4.4, ratingCount: 2300, images: JSON.stringify(["product_images/item27.png"]), colors: JSON.stringify(["product_images/item27.png"]) },
+  { productId: 28, title: "Baby Boys Girls Casual Shirt Shorts", brand: "KILLER", category: "kids", price: 369, mrp: 1452, discount: "52% OFF", rating: 4.1, ratingCount: 4156, images: JSON.stringify(["product_images/item28.png"]), colors: JSON.stringify(["product_images/item28.png"]) },
+  { productId: 29, title: "Baby Boys Girls Casual Shirt Shorts Blue", brand: "KILLER", category: "kids", price: 369, mrp: 2499, discount: "60% OFF", rating: 4.6, ratingCount: 7255, images: JSON.stringify(["product_images/item29.png"]), colors: JSON.stringify(["product_images/item29.png"]) },
+  { productId: 30, title: "Barbie Girls Calf Length Party Dress Green", brand: "RISWA", category: "kids", price: 472, mrp: 1689, discount: "42% OFF", rating: 4.1, ratingCount: 8120, images: JSON.stringify(["product_images/item30.png"]), colors: JSON.stringify(["product_images/item30.png"]) },
+  { productId: 31, title: "Girls Below Knee Party Dress Pink", brand: "VILLATA FASHION", category: "kids", price: 275, mrp: 1699, discount: "64% OFF", rating: 4.2, ratingCount: 1156, images: JSON.stringify(["product_images/item31.png"]), colors: JSON.stringify(["product_images/item31.png"]) },
+  { productId: 32, title: "Girls Above Knee Party Dress Pink", brand: "MT SAHIN DRESSES", category: "kids", price: 224, mrp: 2499, discount: "78% OFF", rating: 4.5, ratingCount: 12120, images: JSON.stringify(["product_images/item32.png"]), colors: JSON.stringify(["product_images/item32.png"]) },
+  { productId: 33, title: "Girls Maxi Full Length Festive Dress Green", brand: "TIOR", category: "kids", price: 463, mrp: 1325, discount: "56% OFF", rating: 4.2, ratingCount: 120, images: JSON.stringify(["product_images/item33.png"]), colors: JSON.stringify(["product_images/item33.png"]) },
+  { productId: 34, title: "Baby Boys Top Pyjama Set Thermal", brand: "PARYAG", category: "kids", price: 558, mrp: 2499, discount: "60% OFF", rating: 4.5, ratingCount: 8120, images: JSON.stringify(["product_images/item34.png"]), colors: JSON.stringify(["product_images/item34.png"]) },
+];
+
+const seedDatabase = async () => {
+  try {
+    console.log('🌱 Starting database seeding...');
+
+    // Sync all models
+    await sequelize.sync({ force: true });
+    console.log('✅ Database synchronized');
+
+    // Seed products
+    await Product.bulkCreate(allProducts);
+    console.log(`✅ Created ${allProducts.length} products`);
+
+    // Create test user
+    const testUser = await User.create({
+      fullName: 'Test User',
+      email: 'test@example.com',
+      phone: '9999999999',
+      password: 'password123',
+      city: 'New York',
+      state: 'NY',
+      country: 'USA',
+      pincode: '10001',
+    });
+    console.log('✅ Created test user:', testUser.email);
+
+    // Create admin user
+    const adminUser = await User.create({
+      fullName: 'Admin User',
+      email: 'admin@example.com',
+      phone: '8888888888',
+      password: 'admin123',
+      role: 'admin',
+      city: 'New York',
+      state: 'NY',
+      country: 'USA',
+      pincode: '10001',
+    });
+    console.log('✅ Created admin user:', adminUser.email);
+
+    console.log('🎉 Database seeding completed successfully!');
+    process.exit(0);
+  } catch (error) {
+    console.error('❌ Error seeding database:', error.message);
+    process.exit(1);
+  }
+};
+
+seedDatabase();
   {
     id: 2,
     title: "Men Solid Round Neck Pure Cotton Dark Green T-Shirt",
